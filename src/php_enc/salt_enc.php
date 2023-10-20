@@ -1,8 +1,6 @@
 <?php
 
 function salt_php_enc($data, $password, $iterations, $aes_mode){
-    print_r("SALT ENC\n");
-
     // Create iv
     $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($aes_mode));
     // Create salt
@@ -10,9 +8,6 @@ function salt_php_enc($data, $password, $iterations, $aes_mode){
 
     // Create secrety key
     $secret_key = hash_pbkdf2("sha512", $password, $salt, $iterations, 32, true); #bin output
-    print_r("secretkey: ".$secret_key."\n"); #bin 
-    print_r("secretkey hex: ".bin2hex($secret_key)."\n"); #hex representation
-    print_r("byte length of secret key: ".strlen($secret_key)."\n");
 
     // Encrypt data
     $et = openssl_encrypt($data, $aes_mode, $secret_key, OPENSSL_RAW_DATA, $iv);
@@ -24,7 +19,8 @@ function salt_php_enc($data, $password, $iterations, $aes_mode){
 
     // Create JSON
     $json = json_encode(array("iv" => $iv_hex, "et" => $et_hex, "salt" => $salt_hex));
-    print_r("json: ".$json."\n");
+
+    // base64 encode JSON
     $json_base64_encode = base64_encode($json);
     return $json_base64_encode;
 }
