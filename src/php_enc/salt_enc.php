@@ -1,6 +1,7 @@
 <?php
 
-function salt_php_enc($data, $password, $iterations, $aes_mode){
+function encrypt_aes256_CBC($data, $password, $iterations){
+    $aes_mode = "AES-256-CBC"; // Currently only AES-256-CBC is supported
     // Create iv
     $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($aes_mode));
     // Create salt
@@ -29,8 +30,7 @@ function salt_php_enc_call(){
     $data = "pokemon";
     $password = "garchomp";
     $iterations = 100;
-    $aes_mode = "AES-256-CBC";
-    $json_et = salt_php_enc($data, $password, $iterations, $aes_mode);
+    $json_et = encrypt_aes256_CBC($data, $password, $iterations, $aes_mode);
     print_r("JSON: ".$json_et."\n");
 }
 

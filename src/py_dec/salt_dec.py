@@ -26,24 +26,53 @@ except (ValueError, FileNotFoundError) as error:
 
 
 def generate_secret_key(salt: bytes, iterations: int, password: str) -> bytes:
+    """Generate secret key from salt and password
+
+    uses PBKDF2 to generate the secret key from the salt and password
+
+    Args:
+        salt(bytes): salt to used to generate the secret key
+        iterations(int): number of iterations to be used in PBKDF2
+        password(str): password
+
+    Returns:
+        secret_key(bytes)
+
+    Raises:
+        ValueError: if the length of the secret key is not 32 bytes for AES-256
+    """
     secret_key = PBKDF2(
         password, salt, 32, iterations, None, hmac_hash_module=SHA512
     )  # 32 byte string is returned
 
-    # check if the secret key is 32 bytes
-    assert len(secret_key) == 32, logger.error(
-        f"Secret key length is {len(secret_key)} bytes it should be 32 bytes"
-    )
+    if len(secret_key) != 32:
+        raise ValueError(
+            "Secret key length is {len(secret_key)} bytes it should be 32 bytes"
+        )
     return secret_key
 
 
-def salt_php_dec(
+def decrypt_aes256_CBC(
     json_base64_encoded: str,
     password: str,
     iterations: int,
-    aes_mode: int,
     list_of_json_obj: list[str],
 ) -> str:
+    """decryption function for AES-256-CBC with salt for secret key generation
+
+    Args:
+        json_base_64_encoded(str): json string with base64 encoded data
+        password(str): password
+        iterations(int): number of iterations to be used in PBKDF2
+        list_of_json_obj(list[str]): list of json object keys that are present in JSON
+
+    Returns:
+        plain_text(str): decrypted plain text
+
+    Raises:
+        ValueError: if the req keys are not present in the json.
+    """
+    aes_mode = AES.MODE_CBC  # Only CBC mode is supported as of now
     # decode json from base64 to utf-8
     json_enc = base64.b64decode(json_base64_encoded).decode("utf-8")
     # check if the req keys are available
@@ -80,16 +109,14 @@ def salt_php_dec(
 def salt_php_dec_call():
     json_base64_encoded = "eyJpdiI6ImNkNGQ0NTc0Zjk4Yzc5YmY3MDdmMGYwMjRkNDg5ZmUyIiwiZXQiOiI2ZjY4YmNjMDcxZjUwMjMwNGQwMDI4MDU2MDAyOGZlMiIsInNhbHQiOiJjZjk4ZjQ0MmMwNzdjZWQ1YWJlNTlkMTM0YThjMGVhMSJ9"
     list_of_json_obj = ["iv", "et", "salt"]
-    aes_mode = AES.MODE_CBC
     password = "garchomp"
     iterations = 100
 
     try:
-        dt = salt_php_dec(
+        dt = decrypt_aes256_CBC(
             json_base64_encoded,
             password,
             iterations,
-            aes_mode,
             list_of_json_obj,
         )
     except ValueError as e:
