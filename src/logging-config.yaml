@@ -1,0 +1,41 @@
+version: 1
+
+formatters:
+  simple:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+  normal:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(module)s - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+handlers:
+  stream:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: simple
+    stream: ext://sys.stdout
+
+  file:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: normal
+    filename: /var/log/garchomp_log/py_dec_php_enc.log
+    maxBytes: 10485760 # 10MB
+    backupCount: 20
+    encoding: utf8
+    mode: a
+
+loggers:
+  py_dec_php_enc-DEVELOPMENT:
+    level: DEBUG
+    handlers: [stream, file]
+    propagate: no
+
+  py_dec_php_enc-PRODUCTION:
+    level: WARNING
+    handlers: [file]
+    propagate: no
+
+root:
+  level: DEBUG
+  handlers: [stream, file]
