@@ -1,3 +1,17 @@
+"""Decryt AES-256-CBC encrypted data from PHP openssl_encrypt() function with s
+salt
+
+Decrypts a JSON string with data from PHP opeenssl_encrypt() function with salt.
+Example usage is shown in the salt_php_dec_call() function.
+Its php encrypt counterpart is in src/php_enc/salt_enc.php
+
+Usage:
+    decrypt_aes256_cbc(
+        json_base64_encoded, 
+        password, iterations, 
+        list_of_json_obj
+    )
+"""
 import base64
 import binascii
 import json
@@ -52,7 +66,7 @@ def generate_secret_key(salt: bytes, iterations: int, password: str) -> bytes:
     return secret_key
 
 
-def decrypt_aes256_CBC(
+def decrypt_aes256_cbc(
     json_base64_encoded: str,
     password: str,
     iterations: int,
@@ -64,7 +78,8 @@ def decrypt_aes256_CBC(
         json_base_64_encoded(str): json string with base64 encoded data
         password(str): password
         iterations(int): number of iterations to be used in PBKDF2
-        list_of_json_obj(list[str]): list of json object keys that are present in JSON
+        list_of_json_obj(list[str]): list of json object keys that are present
+            in JSON
 
     Returns:
         plain_text(str): decrypted plain text
@@ -98,7 +113,6 @@ def decrypt_aes256_CBC(
 
     # decrypt data
     dec_data = decrypt_cipher.decrypt(bin_et)
-    logger.debug(f"dec_data: {dec_data}")
 
     # unpad and get plain text
     dec_data_unpadded = unpad(dec_data, AES.block_size)
@@ -106,14 +120,15 @@ def decrypt_aes256_CBC(
     return plain_text
 
 
-def salt_php_dec_call():
+def salt_py_dec_call():
+    """test caller for decrypt_aes256_cbc()"""
     json_base64_encoded = "eyJpdiI6ImNkNGQ0NTc0Zjk4Yzc5YmY3MDdmMGYwMjRkNDg5ZmUyIiwiZXQiOiI2ZjY4YmNjMDcxZjUwMjMwNGQwMDI4MDU2MDAyOGZlMiIsInNhbHQiOiJjZjk4ZjQ0MmMwNzdjZWQ1YWJlNTlkMTM0YThjMGVhMSJ9"
     list_of_json_obj = ["iv", "et", "salt"]
     password = "garchomp"
     iterations = 100
 
     try:
-        dt = decrypt_aes256_CBC(
+        dt = decrypt_aes256_cbc(
             json_base64_encoded,
             password,
             iterations,
@@ -125,11 +140,11 @@ def salt_php_dec_call():
         sys.exit(1)
 
     logger.debug("plain text: %s", dt)
-    assert dt == "pokemon", logger.error(f"decrypted data is {dt} not pokemon")
-    logger.info("DEC SALT WORKS!!")
+    assert dt == "pokemon", logger.error("decrypted data is %s not pokemon", dt)
 
 
 def main():
+    """main"""
     salt_php_dec_call()
 
 
