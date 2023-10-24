@@ -20,8 +20,6 @@ import sys
 
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
-from Crypto.Protocol.KDF import PBKDF2
-from Crypto.Hash import SHA512
 from logTemplate import make_logger
 from helpers import salt_helpers
 from py_enc import salt_enc
@@ -144,10 +142,9 @@ def salt_py_dec_call_enc_from_py():
 
 def main():
     """main"""
-    print(f"PHP ENC")
+    print("PHP ENC")
     salt_py_dec_call_enc_from_php()
-    print()
-    print(f"PYTHON ENC")
+    print("PYTHON ENC")
     salt_py_dec_call_enc_from_py()
 
 

@@ -1,12 +1,31 @@
-import json
-import binascii
+"""Encrypt AES-256-CBC with salt for secret key generation
+
+Encrypts a string using AES-256-CBC with salt for secret key generation
+
+Usage:
+    encrypt_aes256_cbc(data, password, iterations)
+"""
 import base64
+import binascii
+import json
+
 from Crypto.Cipher import AES
-from helpers import salt_helpers
 from Crypto.Util.Padding import pad
+
+from helpers import salt_helpers
 
 
 def encrypt_aes256_cbc(data: str, password: str, iterations: int) -> str:
+    """encryption function for AwS-256-CBC with salt for secret key generation
+
+    Args:
+        data(str): plaintext to be encrypted
+        password(str): password
+        iterations(int): number of iterations to be used in PBKDF2
+
+    Returns:
+        json_base_64_encode_str(str): json string with base64 encoded data
+    """
     aes_mode = AES.MODE_CBC  # Only CBC mode is supported as of now
     # Create IV
     iv = AES.get_random_bytes(16)  # bytes
@@ -41,12 +60,15 @@ def encrypt_aes256_cbc(data: str, password: str, iterations: int) -> str:
     json_ed = json.dumps(
         {"et": hex_str_et, "iv": hex_str_iv, "salt": hex_str_salt}
     )
+    # convert json to base64
     json_base_64_encode = base64.b64encode(json_ed.encode("utf-8"))
+    # Convert byte string to utf-8 string
     json_base_64_encode_str = str(json_base_64_encode, "utf-8")
     return json_base_64_encode_str
 
 
 def salt_python_enc_call():
+    """test caller for encrypt_aes256_cbc()"""
     data = "pokemon"
     password = "pikachu"
     iterations = 100
@@ -55,6 +77,7 @@ def salt_python_enc_call():
 
 
 def main():
+    """main"""
     json_et = salt_python_enc_call()
     print(f"json_et: {json_et}")
 
