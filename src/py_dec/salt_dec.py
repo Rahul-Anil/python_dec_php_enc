@@ -23,6 +23,8 @@ from Crypto.Util.Padding import unpad
 from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Hash import SHA512
 from logTemplate import make_logger
+from helpers import salt_helpers
+from py_enc import salt_enc
 
 # set current working directory
 parent_directory_path = os.path.dirname(__file__)
@@ -37,33 +39,6 @@ except (ValueError, FileNotFoundError) as error:
     print("SETUP ERROR: COULD NOT INITIALIZE LOGGER")
     print(error)
     sys.exit(1)
-
-
-def generate_secret_key(salt: bytes, iterations: int, password: str) -> bytes:
-    """Generate secret key from salt and password
-
-    uses PBKDF2 to generate the secret key from the salt and password
-
-    Args:
-        salt(bytes): salt to used to generate the secret key
-        iterations(int): number of iterations to be used in PBKDF2
-        password(str): password
-
-    Returns:
-        secret_key(bytes)
-
-    Raises:
-        ValueError: if the length of the secret key is not 32 bytes for AES-256
-    """
-    secret_key = PBKDF2(
-        password, salt, 32, iterations, None, hmac_hash_module=SHA512
-    )  # 32 byte string is returned
-
-    if len(secret_key) != 32:
-        raise ValueError(
-            "Secret key length is {len(secret_key)} bytes it should be 32 bytes"
-        )
-    return secret_key
 
 
 def decrypt_aes256_cbc(
@@ -106,7 +81,9 @@ def decrypt_aes256_cbc(
     bin_salt = binascii.unhexlify(hex_salt)
 
     # generate secret key
-    secret_key = generate_secret_key(bin_salt, iterations, password)
+    secret_key = salt_helpers.generate_secret_key(
+        bin_salt, iterations, password
+    )
 
     # create decrypt cipher obj
     decrypt_cipher = AES.new(secret_key, aes_mode, bin_iv)
@@ -120,7 +97,7 @@ def decrypt_aes256_cbc(
     return plain_text
 
 
-def salt_py_dec_call():
+def salt_py_dec_call_enc_from_php():
     """test caller for decrypt_aes256_cbc()"""
     json_base64_encoded = "eyJpdiI6ImNkNGQ0NTc0Zjk4Yzc5YmY3MDdmMGYwMjRkNDg5ZmUyIiwiZXQiOiI2ZjY4YmNjMDcxZjUwMjMwNGQwMDI4MDU2MDAyOGZlMiIsInNhbHQiOiJjZjk4ZjQ0MmMwNzdjZWQ1YWJlNTlkMTM0YThjMGVhMSJ9"
     list_of_json_obj = ["iv", "et", "salt"]
@@ -143,9 +120,35 @@ def salt_py_dec_call():
     assert dt == "pokemon", logger.error("decrypted data is %s not pokemon", dt)
 
 
+def salt_py_dec_call_enc_from_py():
+    """test caller for decrypt_aes256_cbc()"""
+    json_base64_encoded = salt_enc.salt_python_enc_call()
+    list_of_json_obj = ["iv", "et", "salt"]
+    password = "pikachu"
+    iterations = 100
+    try:
+        dt = decrypt_aes256_cbc(
+            json_base64_encoded,
+            password,
+            iterations,
+            list_of_json_obj,
+        )
+    except ValueError as e:
+        logger.error(e)
+        print("Exiting...")
+        sys.exit(1)
+
+    logger.debug("plain text: %s", dt)
+    assert dt == "pokemon", logger.error("decrypted data is %s not pokemon", dt)
+
+
 def main():
     """main"""
-    salt_php_dec_call()
+    print(f"PHP ENC")
+    salt_py_dec_call_enc_from_php()
+    print()
+    print(f"PYTHON ENC")
+    salt_py_dec_call_enc_from_py()
 
 
 if __name__ == "__main__":
