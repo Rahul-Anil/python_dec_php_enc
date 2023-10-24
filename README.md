@@ -16,3 +16,4 @@ base64 encoded json string as the input and return the decrypted data as a strin
 To see how to use the function see the `salt_py_dec_call()` function in the same file.
 
 ## TODO:
+- move tests to a seperate tests file.
