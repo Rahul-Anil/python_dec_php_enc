@@ -15,28 +15,11 @@ Usage:
 import base64
 import binascii
 import json
-import os
-import sys
 
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
-from logTemplate import make_logger
+
 from helpers import salt_helpers
-from py_enc import salt_enc
-
-# set current working directory
-parent_directory_path = os.path.dirname(__file__)
-set_cwd_path = os.path.abspath(os.path.join(parent_directory_path, os.pardir))
-os.chdir(set_cwd_path)
-
-LOGGER_PATH = "logging-config.yaml"
-LOGGER_NAME = "py_dec_php_enc-DEVELOPMENT"
-try:
-    logger = make_logger.init_logger(LOGGER_PATH, "py_dec_php_enc-DEVELOPMENT")
-except (ValueError, FileNotFoundError) as error:
-    print("SETUP ERROR: COULD NOT INITIALIZE LOGGER")
-    print(error)
-    sys.exit(1)
 
 
 def decrypt_aes256_cbc(
@@ -93,60 +76,3 @@ def decrypt_aes256_cbc(
     dec_data_unpadded = unpad(dec_data, AES.block_size)
     plain_text = dec_data_unpadded.decode("utf-8")
     return plain_text
-
-
-def salt_py_dec_call_enc_from_php():
-    """test caller for decrypt_aes256_cbc()"""
-    json_base64_encoded = "eyJpdiI6ImNkNGQ0NTc0Zjk4Yzc5YmY3MDdmMGYwMjRkNDg5ZmUyIiwiZXQiOiI2ZjY4YmNjMDcxZjUwMjMwNGQwMDI4MDU2MDAyOGZlMiIsInNhbHQiOiJjZjk4ZjQ0MmMwNzdjZWQ1YWJlNTlkMTM0YThjMGVhMSJ9"
-    list_of_json_obj = ["iv", "et", "salt"]
-    password = "garchomp"
-    iterations = 100
-
-    try:
-        dt = decrypt_aes256_cbc(
-            json_base64_encoded,
-            password,
-            iterations,
-            list_of_json_obj,
-        )
-    except ValueError as e:
-        logger.error(e)
-        print("Exiting...")
-        sys.exit(1)
-
-    logger.debug("plain text: %s", dt)
-    assert dt == "pokemon", logger.error("decrypted data is %s not pokemon", dt)
-
-
-def salt_py_dec_call_enc_from_py():
-    """test caller for decrypt_aes256_cbc()"""
-    json_base64_encoded = salt_enc.salt_python_enc_call()
-    list_of_json_obj = ["iv", "et", "salt"]
-    password = "pikachu"
-    iterations = 100
-    try:
-        dt = decrypt_aes256_cbc(
-            json_base64_encoded,
-            password,
-            iterations,
-            list_of_json_obj,
-        )
-    except ValueError as e:
-        logger.error(e)
-        print("Exiting...")
-        sys.exit(1)
-
-    logger.debug("plain text: %s", dt)
-    assert dt == "pokemon", logger.error("decrypted data is %s not pokemon", dt)
-
-
-def main():
-    """main"""
-    print("PHP ENC")
-    salt_py_dec_call_enc_from_php()
-    print("PYTHON ENC")
-    salt_py_dec_call_enc_from_py()
-
-
-if __name__ == "__main__":
-    main()

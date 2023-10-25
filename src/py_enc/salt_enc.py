@@ -65,22 +65,3 @@ def encrypt_aes256_cbc(data: str, password: str, iterations: int) -> str:
     # Convert byte string to utf-8 string
     json_base_64_encode_str = str(json_base_64_encode, "utf-8")
     return json_base_64_encode_str
-
-
-def salt_python_enc_call():
-    """test caller for encrypt_aes256_cbc()"""
-    data = "pokemon"
-    password = "pikachu"
-    iterations = 100
-    json_et = encrypt_aes256_cbc(data, password, iterations)
-    return json_et
-
-
-def main():
-    """main"""
-    json_et = salt_python_enc_call()
-    print(f"json_et: {json_et}")
-
-
-if __name__ == "__main__":
-    main()
