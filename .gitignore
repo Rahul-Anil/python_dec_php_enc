@@ -2,3 +2,4 @@
 *.egg-info/
 __pychache__/
 *.pyc
+.tox

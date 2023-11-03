@@ -2,3 +2,4 @@ black
 pylint
 isort
 pytest
+tox

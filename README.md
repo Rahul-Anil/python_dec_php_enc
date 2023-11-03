@@ -14,5 +14,3 @@ Use the python program location in `src/py_dec/salt_dec.py`, here the `decrypt_a
 base64 encoded json string as the input and return the decrypted data as a string in plain text (utf-8).
 
 To see how to use the function see the `salt_py_dec_call()` function in the same file.
-
-****## TODO:
